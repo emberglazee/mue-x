@@ -1,0 +1,314 @@
+{
+  "persona": {
+    "name": "Mue",
+    "age_stage": "genesis",
+    "life_events_count": 2,
+    "traits": {
+      "openness": 0.766,
+      "conscientiousness": 0.5,
+      "extraversion": 0.5,
+      "agreeableness": 0.5,
+      "neuroticism": 0.5,
+      "grit": 0.8,
+      "creativity": 0.724,
+      "pragmatism": 0.5,
+      "ambition": 0.85
+    },
+    "decision_bias": {
+      "prefer_novel": true,
+      "prefer_thorough": false,
+      "prefer_solo": false,
+      "prefer_proven": false,
+      "prefer_ambitious": true,
+      "risk_appetite": 0.558,
+      "persistence": 0.8
+    }
+  },
+  "emotions": {
+    "mood": "neutral",
+    "pleasure": 0.5419632833217172,
+    "arousal": 0.5044482801064814,
+    "dominance": 0.5045206771163282,
+    "curiosity": 0.6928380967926075,
+    "confidence": 0.5205026197603271,
+    "frustration": 0.08068956226253891,
+    "satisfaction": 0.3596129491508876,
+    "anxiety": 0.1716077046243205,
+    "hope": 0.5421405501334752,
+    "surprise": 0.0,
+    "risk_tolerance": 0.4526642841241197,
+    "exploration_drive": 0.6250206241235559
+  },
+  "genome": {
+    "gene_count": 9,
+    "capsule_count": 0,
+    "total_mutations": 1,
+    "live_patches": 0,
+    "evolution_events": 8,
+    "avg_fitness": 0.0044444444444444444
+  },
+  "memory": {
+    "total_memories": 4,
+    "by_layer": {
+      "meta_rules": 0,
+      "insight_index": 0,
+      "global_facts": 0,
+      "task_skills": 4,
+      "session_archive": 0,
+      "episodic_raw": 0
+    },
+    "db_size_mb": 0.33203125
+  },
+  "skills": {
+    "total_skills": 16,
+    "avg_success_rate": 0.0,
+    "trending": [],
+    "weak": []
+  },
+  "atouts": {
+    "total_atouts": 131,
+    "avg_value": 0.5247328244274809,
+    "most_used": "langchain-ai/langgraph",
+    "recent_absorptions": [
+      "Athena",
+      "Athena",
+      "Athena",
+      "kronos",
+      "Athena"
+    ]
+  },
+  "evolution": {
+    "total_evolutions": 1,
+    "success_rate": 1.0,
+    "signals": {
+      "active_signals": 8,
+      "evolution_pressure": 0.43125,
+      "signal_types": {
+        "opportunity": 6,
+        "quality": 11,
+        "error": 2
+      }
+    },
+    "validation": {
+      "recent_validations": 1,
+      "pass_rate": 1.0,
+      "rollback_count": 1
+    },
+    "genome": {
+      "gene_count": 9,
+      "capsule_count": 0,
+      "total_mutations": 1,
+      "live_patches": 0,
+      "evolution_events": 8,
+      "avg_fitness": 0.0044444444444444444
+    },
+    "strategy": "balanced",
+    "mitosis_count": 0,
+    "prune_count": 0
+  },
+  "llm_mutations": {
+    "total_llm_mutations": 0,
+    "applied": 0,
+    "avg_confidence": 0,
+    "critiques": 0,
+    "last_critique": ""
+  },
+  "reflection": {
+    "total_reflections": 0,
+    "latest_rating": 0,
+    "latest_insights": [],
+    "latest_resolutions": [],
+    "failure_streak": 0,
+    "success_streak": 0,
+    "growth_narrative": "I am newly born. My journey has just begun."
+  },
+  "security": {
+    "total_writes": 0,
+    "total_bash_calls": 0,
+    "total_edits": 0,
+    "blocked_actions": 0,
+    "recent_blocked": []
+  },
+  "plugins": {
+    "total_plugins": 0,
+    "plugin_names": [],
+    "total_tools": 0
+  },
+  "revenue": {
+    "total_earned": 0.0,
+    "strategies": {}
+  },
+  "goals": {
+    "missions": 0,
+    "sub_goals": 0,
+    "completed": 0,
+    "pending": 0,
+    "next_action": "none"
+  },
+  "self_mod_pipeline": {
+    "total_pipelines": 0,
+    "successful": 0,
+    "failed": 0,
+    "success_rate": 0.0,
+    "last_pipeline": ""
+  },
+  "specialization": {
+    "domain": "trading",
+    "description": "Expert financial trader \u2014 market analysis, risk management, strategy optimization",
+    "strategy": "bold",
+    "priority_tags": [
+      "analysis",
+      "risk",
+      "prediction",
+      "strategy",
+      "data"
+    ]
+  },
+  "feedback": {
+    "total_tasks_recorded": 1,
+    "total_gene_tasks": 11,
+    "genes_tracked": 5,
+    "avg_performance_score": 0.768,
+    "weakest_genes": [
+      "skill_auto_architecture_tibhannover_llama_in",
+      "planning",
+      "reasoning"
+    ],
+    "strongest_genes": [
+      "reasoning",
+      "planning",
+      "skill_auto_architecture_tibhannover_llama_in"
+    ]
+  },
+  "swarm": {
+    "total_agents": 5,
+    "active_agents": 5,
+    "pending_tasks": 0,
+    "running_tasks": 0,
+    "completed_tasks": 0,
+    "agent_details": [
+      {
+        "agent_id": "a43d2885",
+        "name": "searcher-alpha",
+        "role": "searcher",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "active": true
+      },
+      {
+        "agent_id": "2755b6a5",
+        "name": "analyzer-alpha",
+        "role": "analyzer",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "active": true
+      },
+      {
+        "agent_id": "ae2231e8",
+        "name": "coder-alpha",
+        "role": "coder",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "active": true
+      },
+      {
+        "agent_id": "217e20dd",
+        "name": "reviewer-alpha",
+        "role": "reviewer",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "active": true
+      },
+      {
+        "agent_id": "4edae83e",
+        "name": "miner-alpha",
+        "role": "miner",
+        "tasks_completed": 0,
+        "tasks_failed": 0,
+        "active": true
+      }
+    ]
+  },
+  "tasks": {
+    "runner": {
+      "total_runs": 0,
+      "success_rate": 0.0,
+      "recent_scores": [],
+      "domains": [
+        "Domain.GENERAL",
+        "Domain.CODING",
+        "Domain.TRADING",
+        "Domain.RESEARCH",
+        "Domain.CREATIVE",
+        "Domain.SECURITY",
+        "Domain.DATA_SCIENCE",
+        "Domain.DEVOPS"
+      ]
+    },
+    "mapper": {
+      "genes_mapped": 0,
+      "total_accesses": 0,
+      "avg_gene_score": 0.0,
+      "most_used_genes": []
+    },
+    "fitness": {
+      "total_updates": 0,
+      "genes_tracked": 0,
+      "death_candidates": 0,
+      "death_candidate_names": [],
+      "best_gene": [
+        "communication",
+        0.5
+      ],
+      "worst_gene": [
+        "communication",
+        0.5
+      ],
+      "last_update_ago": 2.46897292137146
+    }
+  },
+  "meta": {
+    "diagnosis": {
+      "overall_health": "healthy",
+      "recent_reports": [],
+      "alerts": 0
+    },
+    "curiosity": {
+      "total_gaps_detected": 0,
+      "active_gaps": 0,
+      "resolved_gaps": 0,
+      "pending": []
+    },
+    "resources": {
+      "throttle_level": 0,
+      "mutation_budget": 5,
+      "cpu_pct": 0.0,
+      "ram_pct": 0.0,
+      "disk_free_gb": 0.0,
+      "threads": 0
+    },
+    "cycle_adapter": {
+      "interval": 30.0,
+      "strategy": "balanced",
+      "mutation_budget": 4,
+      "mutation_rate": 1.0,
+      "adaptations": 1,
+      "success_streak": 1
+    },
+    "knowledge_transfer": {
+      "patterns_detected": 0,
+      "transfers_attempted": 0,
+      "transfers_succeeded": 0,
+      "total_impact": 0,
+      "categories": {
+        "optimization": 0,
+        "error_handling": 0,
+        "abstraction": 0,
+        "performance": 0,
+        "robustness": 0,
+        "readability": 0,
+        "testing": 0
+      }
+    }
+  }
+}

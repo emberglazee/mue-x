@@ -1,0 +1,50 @@
+name: MUE-X Brain Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Brain integrity check
+        run: |
+          python -c "from mue.evo.core import MueAgent; print('BRAIN INTACT')"
+
+      - name: Anti-cancer check (line limits)
+        run: |
+          python -c "
+          from pathlib import Path
+          genes = list(Path('mue/evo').rglob('*.py'))
+          oversized = [(g, len(g.read_text(encoding='utf-8').splitlines())) for g in genes if len(g.read_text(encoding='utf-8').splitlines()) > 800]
+          if oversized:
+              for g, size in oversized:
+                  print(f'ANTI-CANCER VIOLATION: {g} has {size} lines (max 800)')
+              exit(1)
+          print(f'ANTI-CANCER: All {len(genes)} genes within 800-line limit')
+          "
+
+      - name: Verify no binary artifacts
+        run: |
+          python -c "
+          import os, sys
+          bad = []
+          for root, dirs, files in os.walk('.'):
+              if '.git' in root:
+                  continue
+              for f in files:
+                  if f.endswith(('.db', '.sqlite', '.sqlite3')):
+                      bad.append(os.path.join(root, f))
+          if bad:
+              print(f'BINARY ARTIFACTS FOUND: {bad}')
+              sys.exit(1)
+          print('No binary artifacts found')
+          "
