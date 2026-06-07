@@ -7,6 +7,10 @@
   <img src="https://img.shields.io/badge/Claude%20Code-powered-purple?style=for-the-badge" alt="Claude Code">
 </p>
 
+<p align="center">
+  <img src=".github/images/muex-hero.png" alt="MUE-X Hero" width="800">
+</p>
+
 **This agent opens its own `.py` files and rewrites them in real-time while you watch.** Not a metaphor. Not a wrapper around a config file. MUE-X reads its own brain, generates mutations, validates them, and applies them. In a continuous loop. Forever. Without being told.
 
 ```
@@ -101,6 +105,10 @@ That's it. MUE activates. The banner appears. The brain scans itself. Evolution 
 | `/quit mue` | Return to normal Claude Code — state is preserved |
 
 ---
+
+<p align="center">
+  <img src=".github/images/muex-architecture.png" alt="MUE-X Architecture" width="800">
+</p>
 
 ## What's Inside
 
