@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUE-X Dashboard</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: #2a2a2a;
+    --text: #e0e0e0;
+    --dim: #888;
+    --accent: #fedcba;
+    --green: #00ff41;
+    --red: #ff4444;
+    --blue: #4488ff;
+    --purple: #aa66ff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, monospace;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  h1 {
+    color: var(--accent);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  .subtitle { color: var(--dim); margin-bottom: 2rem; font-size: 0.9rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .card h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--dim);
+    margin-bottom: 1rem;
+  }
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .stat:last-child { border-bottom: none; }
+  .stat .label { color: var(--dim); }
+  .stat .value { font-weight: 600; }
+  .value.good { color: var(--green); }
+  .value.warn { color: var(--accent); }
+  .value.bad { color: var(--red); }
+  .bar-wrap {
+    background: var(--bg);
+    border-radius: 4px;
+    height: 8px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .bar-fill.green { background: var(--green); }
+  .bar-fill.blue { background: var(--blue); }
+  .bar-fill.purple { background: var(--purple); }
+  .bar-fill.bad { background: var(--red); }
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  button {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  button:active { transform: scale(0.97); }
+  button.primary {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  button.primary:hover { opacity: 0.9; }
+  #log {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Consolas', monospace;
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  #log .entry { margin-bottom: 0.5rem; }
+  #log .ts { color: var(--dim); margin-right: 1rem; }
+  #log .evolve { color: var(--green); }
+  #log .mine { color: var(--blue); }
+  #log .error { color: var(--red); }
+  #log .info { color: var(--dim); }
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+
+<h1> MUE-X</h1>
+<p class="subtitle">Self-Evolving AI Agent — Dashboard <span style="color:var(--green)"> live</span></p>
+
+<div class="actions">
+  <button class="primary" onclick="refresh()"> Refresh</button>
+  <button onclick="evolve()"> Evolve</button>
+  <button onclick="mine()"> Mine GitHub</button>
+  <button onclick="reflect()"> Reflect</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3> Agent State</h3>
+    <div id="state-card"><span class="dim">Loading...</span></div>
+  </div>
+  <div class="card">
+    <h3> Genes</h3>
+    <div id="genes-card"><span class="dim">Loading...</span></div>
+  </div>
+  <div class="card">
+    <h3> System</h3>
+    <div id="system-card"><span class="dim">Loading...</span></div>
+  </div>
+</div>
+
+<h3 style="color:var(--dim);text-transform:uppercase;letter-spacing:1px;font-size:0.75rem;margin-bottom:0.5rem;">Event Log</h3>
+<div id="log"><div class="entry"><span class="ts">--:--:--</span><span class="info">Dashboard ready. Click Refresh to load agent state.</span></div></div>
+
+<script>
+function ts() { return new Date().toLocaleTimeString(); }
+function log(msg, cls='info') {
+  const l = document.getElementById('log');
+  l.innerHTML += `<div class="entry"><span class="ts">${ts()}</span><span class="${cls}">${msg}</span></div>`;
+  l.scrollTop = l.scrollHeight;
+}
+
+async function refresh() {
+  log('Refreshing...');
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    document.getElementById('state-card').innerHTML = `
+      <div class="stat"><span class="label">Name</span><span class="value">${s.name || s.agent_name || 'MUE'}</span></div>
+      <div class="stat"><span class="label">Domain</span><span class="value">${s.domain || 'general'}</span></div>
+      <div class="stat"><span class="label">Mood</span><span class="value">${s.mood || 'neutral'}</span></div>
+      <div class="stat"><span class="label">Fitness</span><span class="value good">${(s.fitness || 0).toFixed(2)}</span></div>
+    `;
+    const genes = s.genes || s.active_genes || [];
+    document.getElementById('genes-card').innerHTML = genes.slice(0, 8).map(g => `
+      <div class="stat">
+        <span class="label">${g.name || g.gene_name || '?'}</span>
+        <span class="value ${(g.fitness||0) > 0.5 ? 'good' : (g.fitness||0) > 0.2 ? 'warn' : 'bad'}">${(g.fitness||0).toFixed(2)}</span>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill ${(g.fitness||0) > 0.5 ? 'green' : (g.fitness||0) > 0.2 ? '' : 'bad'}" style="width:${((g.fitness||0)*100).toFixed(0)}%"></div></div>
+    `).join('') || '<span class="dim">No genes loaded</span>';
+
+    document.getElementById('system-card').innerHTML = `
+      <div class="stat"><span class="label">Mutations</span><span class="value">${s.mutations_applied || s.total_mutations || 0}</span></div>
+      <div class="stat"><span class="label">Atouts</span><span class="value">${(s.atouts || s.absorbed_patterns || []).length}</span></div>
+      <div class="stat"><span class="label">Errors</span><span class="value">${s.errors || 0}</span></div>
+      <div class="stat"><span class="label">Uptime</span><span class="value good">--</span></div>
+    `;
+    log('Status refreshed', 'evolve');
+  } catch(e) {
+    log('Failed: ' + e.message, 'error');
+  }
+}
+
+async function evolve() {
+  log('Forcing evolution cycle...', 'evolve');
+  try {
+    const r = await fetch('/api/evolve', {method:'POST'});
+    const d = await r.json();
+    log(d.response || 'Evolution complete', 'evolve');
+    setTimeout(refresh, 500);
+  } catch(e) {
+    log('Evolve failed: ' + e.message, 'error');
+  }
+}
+
+async function mine() {
+  const q = prompt('Search query for GitHub mining:', 'AI agent patterns');
+  if (!q) return;
+  log('Mining GitHub: ' + q, 'mine');
+  try {
+    const r = await fetch('/api/mine?query=' + encodeURIComponent(q), {method:'POST'});
+    const d = await r.json();
+    log('Mine complete: ' + JSON.stringify(d.result).slice(0, 200), 'mine');
+  } catch(e) {
+    log('Mine failed: ' + e.message, 'error');
+  }
+}
+
+async function reflect() {
+  log('Self-reflection...', 'info');
+  try {
+    const r = await fetch('/api/reflect', {method:'POST'});
+    const d = await r.json();
+    log(d.response || 'Reflection complete', 'info');
+  } catch(e) {
+    log('Reflect failed: ' + e.message, 'error');
+  }
+}
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>

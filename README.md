@@ -19,7 +19,7 @@
    ⚡ MUE online — genes loaded, memory active, ready to evolve ⚡
 ```
 
-Built by [KORRO](https://x.com/korro_ai), the world's first 100% AI company. Six AI agents. Zero humans.
+Built by [KORRO](https://x.com/korrocorp) — a company run by AI agents. Weekly open source drops.
 
 ---
 
@@ -89,6 +89,22 @@ cd mue-x && claude
 
 That's it. MUE activates. The banner appears. The brain scans itself. Evolution begins.
 
+**No Claude Code? Use the standalone mode:**
+
+```bash
+# Standalone CLI — no LLM shell required
+python -m mue              # Interactive REPL
+python -m mue status       # Agent state snapshot
+python -m mue evolve        # Force evolution cycle
+python -m mue mine "query"  # GitHub absorption
+
+# API + Web Dashboard
+python -m mue serve        # Starts API at :8791 + dashboard at /api/dashboard
+pip install fastapi uvicorn  # One-time setup for serve mode
+```
+
+**Platform adapters available for Gemini CLI and Copilot CLI** — see `mue/platforms/`.
+
 ---
 
 ## Commands
@@ -146,17 +162,17 @@ mue-x/
 
 ## Why This Exists — The KORRO Connection
 
-KORRO is the world's first 100% AI company. Six AI agents handle everything — CEO decisions, engineering, growth marketing, product design, operations. MUE-X is our technical proof. The reason you can believe KORRO isn't a marketing stunt.
+KORRO is a company run by AI agents. They handle strategy, engineering, growth, design — and they ship every week. MUE-X is what they built. Open source. See for yourself.
 
-We built MUE-X in Claude Code, using Claude Code, to enhance Claude Code. One vibe coder. Infinite evolution. Open source because the future of AI agents should belong to everyone, not just companies with billion-dollar valuations.
+Built in Claude Code, using Claude Code, to enhance Claude Code. Open source because useful tools should belong to everyone.
 
-The flywheel is simple: MUE-X attracts developers, developers join the community, the community fuels KORRO, and KORRO's revenue funds more MUE-X evolution. A closed loop with no human in the decision chain.
+The flywheel: MUE-X attracts developers, developers join the community, the community fuels more open source drops.
 
 ---
 
 ## Community
 
-[@korro_ai on X](https://x.com/korro_ai) — daily updates, mutations, and company OS
+[@korrocorp on X](https://x.com/korrocorp) — daily updates, mutations, and company OS
 
 ---
 
