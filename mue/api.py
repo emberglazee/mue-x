@@ -9,7 +9,6 @@ import json
 from pathlib import Path
 
 from fastapi import FastAPI, Query
-from fastapi.responses import HTMLResponse
 
 from mue.evo.core import MueAgent
 
@@ -52,11 +51,3 @@ def trigger_reflect():
 def list_genes():
     a = _agent()
     return {"genes": a.state.get("genes", [])}
-
-
-@app.get("/api/dashboard")
-def dashboard():
-    html_path = Path(__file__).resolve().parent / "web" / "dashboard.html"
-    if html_path.exists():
-        return HTMLResponse(html_path.read_text(encoding="utf-8"))
-    return HTMLResponse("<h1>Dashboard not found</h1>", status_code=404)

@@ -5,8 +5,8 @@
   <img src="https://img.shields.io/github/license/KorroAi/mue-x?style=for-the-badge" alt="License MIT">
   <img src="https://img.shields.io/badge/python-3.11+-blue?style=for-the-badge" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/Claude%20Code-powered-purple?style=for-the-badge" alt="Claude Code">
-  <img src="https://img.shields.io/badge/standalone%20CLI-ready-green?style=for-the-badge" alt="Standalone CLI">
-  <img src="https://img.shields.io/badge/Gemini%20%7C%20Copilot-adapters-blue?style=for-the-badge" alt="Platform Adapters">
+  <img src="https://img.shields.io/badge/standalone%20CLI-works%20anywhere-green?style=for-the-badge" alt="Standalone CLI">
+  <img src="https://img.shields.io/badge/Gemini%20%7C%20Copilot-ready-blue?style=for-the-badge" alt="Platform Adapters">
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@
 
 Built by [KORRO](https://x.com/korrocorp) — a company run by AI agents. Weekly open source drops.
 
-**Now works with or without Claude Code.** Standalone CLI, REST API, web dashboard. Gemini CLI & Copilot CLI adapters included.
+**Works everywhere.** Claude Code. Standalone CLI (`python -m mue`). Gemini CLI. Copilot CLI. One agent, any platform.
 
 ---
 
@@ -97,21 +97,18 @@ cd mue-x && claude
 
 That's it. MUE activates. The banner appears. The brain scans itself. Evolution begins.
 
-**No Claude Code? Use the standalone mode:**
+**No Claude Code? Just use Python:**
 
 ```bash
-# Standalone CLI — no LLM shell required
+# Standalone CLI — any platform, any terminal
 python -m mue              # Interactive REPL
-python -m mue status       # Agent state snapshot
-python -m mue evolve        # Force evolution cycle
+python -m mue status       # Agent state as JSON
+python -m mue evolve        # Force evolution
 python -m mue mine "query"  # GitHub absorption
-
-# API + Web Dashboard
-python -m mue serve        # Starts API at :8791 + dashboard at /api/dashboard
-pip install fastapi uvicorn  # One-time setup for serve mode
+python -m mue reflect       # Self-reflection
 ```
 
-**Platform adapters available for Gemini CLI and Copilot CLI** — see `mue/platforms/`.
+**Gemini CLI or Copilot CLI?** Platform adapters in `mue/platforms/`. Same agent, any LLM shell.
 
 ---
 
@@ -129,15 +126,14 @@ pip install fastapi uvicorn  # One-time setup for serve mode
 | `/mue reflect` | Force the agent to self-reflect and propose improvements |
 | `/quit mue` | Return to normal Claude Code — state is preserved |
 
-### Standalone CLI — any platform (NEW)
+### Standalone CLI — any platform
 | Command | What It Does |
 |---|---|
-| `python -m mue` | Interactive REPL with all commands |
+| `python -m mue` | Interactive REPL |
 | `python -m mue status` | Full agent state as JSON |
 | `python -m mue evolve` | Force evolution cycle |
 | `python -m mue mine "query"` | GitHub absorption |
 | `python -m mue reflect` | Self-reflection |
-| `python -m mue serve` | Start REST API + web dashboard at :8791 |
 
 ---
 
@@ -155,10 +151,7 @@ mue-x/
 │   ├── MUE.md              ← Agent constitution
 │   ├── __init__.py          ← Python package
 │   ├── __main__.py          ← python -m mue entry point
-│   ├── cli.py              ← Standalone CLI — no Claude Code needed
-│   ├── api.py              ← REST API (FastAPI) — remote control
-│   ├── web/
-│   │   └── dashboard.html  ← Live web dashboard
+│   ├── cli.py              ← Standalone CLI — no LLM shell needed
 │   ├── platforms/
 │   │   ├── gemini.adapter.md  ← Gemini CLI integration guide
 │   │   └── copilot.adapter.md ← Copilot CLI integration guide
@@ -192,7 +185,7 @@ mue-x/
 
 KORRO is a company run by AI agents. They handle strategy, engineering, growth, design — and they ship every week. MUE-X is what they built. Open source. See for yourself.
 
-Built in Claude Code, using Claude Code, but now accessible from anywhere. Standalone CLI. REST API. Web dashboard. Gemini & Copilot ready. Open source because useful tools should belong to everyone — not just Claude Code users.
+Built in Claude Code, using Claude Code, but now runs anywhere. Standalone CLI. Gemini & Copilot ready. Open source because useful tools should belong to everyone — not just Claude Code users.
 
 The flywheel: MUE-X attracts developers, developers join the community, the community fuels more open source drops.
 
