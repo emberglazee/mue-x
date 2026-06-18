@@ -6,7 +6,7 @@ Usage:
     python -m mue evolve       # Force one evolution cycle
     python -m mue mine "query" # GitHub absorption
     python -m mue reflect      # Self-reflection
-    python -m mue serve        # Start API + web dashboard
+    python -m mue serve        # Start API server
 """
 
 import sys
@@ -46,10 +46,22 @@ def cmd_reflect():
 
 
 def cmd_serve(host: str = "127.0.0.1", port: int = 8791):
-    import uvicorn
-    print(f" MUE-X API + Dashboard: http://{host}:{port}")
-    print(f" Dashboard: http://{host}:{port}/dashboard")
-    uvicorn.run("mue.api:app", host=host, port=port, reload=False)
+    try:
+        import uvicorn
+    except ImportError:
+        print("uvicorn is required for API mode.")
+        print("Install with: pip install fastapi uvicorn")
+        sys.exit(1)
+    try:
+        from mue.api import create_app
+        app = create_app()
+    except ImportError as e:
+        print(f"FastAPI is required for API mode: {e}")
+        print("Install with: pip install fastapi uvicorn")
+        sys.exit(1)
+    print(f" MUE-X API: http://{host}:{port}")
+    print(f" Docs: http://{host}:{port}/api/docs")
+    uvicorn.run(app, host=host, port=port, reload=False)
 
 
 def cmd_interactive():
@@ -108,7 +120,7 @@ def main():
     sub.add_parser("status", help="Show agent state")
     sub.add_parser("evolve", help="Force evolution cycle")
     sub.add_parser("reflect", help="Self-reflection")
-    sub.add_parser("serve", help="Start API + web dashboard")
+    sub.add_parser("serve", help="Start API server")
     mine_p = sub.add_parser("mine", help="GitHub absorption")
     mine_p.add_argument("query", nargs="?", default="AI agent patterns")
 
