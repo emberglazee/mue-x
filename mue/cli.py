@@ -33,10 +33,20 @@ def cmd_evolve():
     print(result.get("response", "Evolution complete"))
 
 
-def cmd_mine(query: str):
+def cmd_mine(query: str, domain: str = "general", file_types=None):
     agent = get_agent()
-    result = agent._handle_mine_command(query)
-    print(json.dumps(result, indent=2, default=str))
+    if query.startswith("repo:"):
+        repo_name = query[5:].strip()
+        absorbed = agent.miner.mine_repo(repo_name, domain=domain, file_types=file_types)
+    else:
+        absorbed = agent.miner.mine(query, domain=domain, file_types=file_types)
+    if absorbed:
+        print(f"Absorbed {len(absorbed)} patterns:")
+        for p in sorted(absorbed, key=lambda x: -x.value_assessment)[:10]:
+            print(f"  v={p.value_assessment:.2f} [{p.pattern_type}] {p.source_repo} — {p.description[:60]}")
+        print(f"Total atouts: {agent.miner.stats['total_atouts']}")
+    else:
+        print("No new patterns absorbed.")
 
 
 def cmd_reflect():
@@ -83,7 +93,8 @@ def cmd_interactive():
             print("Quitting. State preserved.")
             break
         if msg == "/help":
-            print("Commands: /status, /evolve, /mine <q>, /reflect, /genes, /atouts, /quit")
+            print("Commands: /status, /evolve, /mine <q> or repo:<name>, /reflect, /genes, /atouts, /quit")
+            print("  /mine repo:user/repo --domain coding --types .rs,.go  — direct repo mining")
             continue
         if msg == "/status":
             cmd_status()
@@ -92,8 +103,16 @@ def cmd_interactive():
             cmd_evolve()
             continue
         if msg.startswith("/mine"):
-            query = msg[6:].strip() or "AI agent patterns"
-            cmd_mine(query)
+            parts = msg[6:].strip().split(" --")
+            query = parts[0].strip()
+            domain = "general"
+            file_types = None
+            for p in parts[1:]:
+                if p.startswith("domain "):
+                    domain = p[7:].strip()
+                if p.startswith("types "):
+                    file_types = [t.strip() for t in p[6:].strip().split(",")]
+            cmd_mine(query, domain=domain, file_types=file_types)
             continue
         if msg == "/reflect":
             cmd_reflect()
@@ -127,6 +146,8 @@ def main():
     sub.add_parser("serve", help="Start API server")
     mine_p = sub.add_parser("mine", help="GitHub absorption")
     mine_p.add_argument("query", nargs="?", default="AI agent patterns")
+    mine_p.add_argument("--domain", default="general", help="Keyword scoring domain")
+    mine_p.add_argument("--types", nargs="*", default=None, help="File extensions (e.g. .rs .go)")
 
     args = parser.parse_args()
 
@@ -135,7 +156,7 @@ def main():
     elif args.command == "evolve":
         cmd_evolve()
     elif args.command == "mine":
-        cmd_mine(args.query)
+        cmd_mine(args.query, domain=args.domain, file_types=args.types)
     elif args.command == "reflect":
         cmd_reflect()
     elif args.command == "serve":
