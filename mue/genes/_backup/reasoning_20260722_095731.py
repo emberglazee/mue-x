@@ -50,14 +50,13 @@ def select_strategy(context: dict) -> str:
     if successes > 5 and resources > 0.7:
         return 'bold'
     return 'balanced'
+
 import functools
 import time
 
-def _retry_on_failure(max_retries: int=3, delay: float=1.0, backoff: float=2.0):
+def _retry_on_failure(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0):
     """Decorator: retry a function on exception with exponential backoff."""
-
     def decorator(func):
-
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             _delay = delay
@@ -72,18 +71,18 @@ def _retry_on_failure(max_retries: int=3, delay: float=1.0, backoff: float=2.0):
             return None
         return wrapper
     return decorator
+
+
 import time
 
 class _CircuitBreaker:
     """Prevents cascading failures by stopping calls after threshold."""
-
-    def __init__(self, failure_threshold: int=5, recovery_timeout: float=60.0):
+    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self._failures = 0
         self._last_failure_time = 0.0
         self._state = 'closed'
-
     @property
     def is_open(self) -> bool:
         if self._state == 'closed':
@@ -92,13 +91,11 @@ class _CircuitBreaker:
             self._state = 'half_open'
             return False
         return True
-
     def record_failure(self):
         self._failures += 1
         self._last_failure_time = time.time()
         if self._state == 'half_open' or self._failures >= self.failure_threshold:
             self._state = 'open'
-
     def record_success(self):
         self._failures = 0
         self._state = 'closed'

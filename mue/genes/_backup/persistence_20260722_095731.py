@@ -64,25 +64,3 @@ class StateCache:
         """Cache statistics."""
         valid = sum((1 for _ in self._memory))
         return {'cached_entries': valid, 'cache_dir': str(self.cache_dir)}
-
-import time
-from collections import defaultdict
-
-class _MetricsCollector:
-    """Lightweight metrics: count, timing, and success/failure tracking."""
-    def __init__(self):
-        self.counters = defaultdict(int)
-        self.timings = defaultdict(list)
-        self.outcomes = defaultdict(lambda: {'success': 0, 'failure': 0})
-    def track(self, name: str, elapsed: float, success: bool):
-        self.counters[name] += 1
-        self.timings[name].append(elapsed)
-        key = 'success' if success else 'failure'
-        self.outcomes[name][key] += 1
-    def avg_time(self, name: str) -> float:
-        vals = self.timings.get(name, [])
-        return sum(vals) / len(vals) if vals else 0.0
-    def success_rate(self, name: str) -> float:
-        o = self.outcomes[name]
-        total = o['success'] + o['failure']
-        return o['success'] / max(total, 1)

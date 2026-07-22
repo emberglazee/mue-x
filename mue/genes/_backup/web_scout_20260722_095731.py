@@ -40,15 +40,3 @@ def quick_search(query: str) -> str:
     if not results:
         return f'[No web results for: {query}]'
     return '\n'.join((r['snippet'][:200] for r in results))
-
-import json
-from pathlib import Path
-
-def _load_config_with_defaults(config_path: str, defaults: dict) -> dict:
-    """Load JSON config, merging with sensible defaults for missing keys."""
-    path = Path(config_path)
-    if not path.exists():
-        return defaults
-    loaded = json.loads(path.read_text(encoding='utf-8'))
-    merged = {**defaults, **loaded}
-    return merged
