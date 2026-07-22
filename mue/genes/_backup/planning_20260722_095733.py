@@ -88,7 +88,3 @@ class TaskPlanner:
 
     def stats(self) -> dict:
         return {'pending': sum((1 for t in self.tasks if t['status'] == 'pending')), 'in_progress': sum((1 for t in self.tasks if t['status'] == 'in_progress')), 'completed': self._completed, 'failed': self._failed, 'success_rate': self._completed / max(self._completed + self._failed, 1)}
-
-def _safe_divide(a: float, b: float, default: float = 0.0) -> float:
-    """Divide safely, returning default when divisor is zero."""
-    return a / b if abs(b) > 1e-10 else default

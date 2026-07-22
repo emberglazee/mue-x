@@ -67,13 +67,13 @@ def _retry_on_failure(max_retries: int=3, delay: float=1.0, backoff: float=2.0):
         return wrapper
     return decorator
 
-def _process_in_batches(items: list, batch_size: int=100, processor=None):
+def _process_in_batches(items: list, batch_size: int = 100, processor=None):
     """Process a large list in batches to manage memory."""
     results = []
     for i in range(0, len(items), batch_size):
         batch = items[i:i + batch_size]
         if processor:
-            results.extend((processor(item) for item in batch))
+            results.extend(processor(item) for item in batch)
         else:
             results.extend(batch)
     return results
