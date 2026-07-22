@@ -364,7 +364,7 @@ class GitHubMiner:
             0 if self._filename_matches_domain(f.name, domain) else 1,
             abs(f.stat().st_size - 8000)
         ))
-        selected = src_files[:50]
+        selected = src_files[:200]
 
         for src_file in selected:
             try:
@@ -420,7 +420,7 @@ class GitHubMiner:
                 and "example" not in p.lower()
                 and not p.endswith("setup.py")
                 and not self._is_noise_file(p.split("/")[-1], domain)
-            ][:20]
+            ][:50]
 
             for path in py_paths:
                 try:
@@ -521,7 +521,7 @@ class GitHubMiner:
                         1 if any(e["path"].endswith(n) for n in ("__init__.py", "mod.rs", "lib.rs")) else 0,
                         -(e.get("size", 0))
                     ))
-                    selected = src_entries[:5]
+                    selected = src_entries[:15]
 
                     for entry in selected:
                         path = entry["path"]
