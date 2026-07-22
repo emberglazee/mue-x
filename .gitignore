@@ -1,4 +1,4 @@
-# MUE-X — Self-Evolving Agent
+# MUE-X ï¿½ Self-Evolving Agent
 # Python
 __pycache__/
 *.py[cod]
@@ -39,3 +39,8 @@ mue_feedback.db
 backtest_results_*.json
 mue/atouts/backtest_*.py
 mue/atouts/backtest_*.json
+
+# Generated atouts (absorbed patterns)
+mue/atouts/_manifest.json
+mue/atouts/*.py
+mue/genes/atout_*.py

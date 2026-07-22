@@ -97,7 +97,10 @@ def handle_request(method: str, params: dict, req_id):
                 "inputSchema": {
                     "type": "object",
                     "properties": {
-                        "query": {"type": "string", "description": "What to search for (optional)"},
+                        "query": {"type": "string", "description": "Text search query (optional if 'repo' is given)"},
+                        "repo": {"type": "string", "description": "Specific GitHub repo to mine (e.g. 'emberglazee/Hearts-of-Modding'). Skips search, goes straight to clone + extract."},
+                        "domain": {"type": "string", "description": "Domain for keyword scoring/filtering: 'general', 'coding', 'trading', 'research', etc. Default: 'general'"},
+                        "file_types": {"type": "array", "items": {"type": "string"}, "description": "File extensions to mine, e.g. ['.py', '.rs']. Default: ['.py']"},
                     },
                 },
             },
@@ -173,7 +176,13 @@ def _call_tool(name: str, args: dict) -> dict:
 
     if name == "mue_mine":
         query = args.get("query")
-        absorbed = agent.miner.mine(query)
+        repo = args.get("repo")
+        domain = args.get("domain", "general")
+        file_types = args.get("file_types")
+        if repo:
+            absorbed = agent.miner.mine_repo(repo, domain=domain, file_types=file_types)
+        else:
+            absorbed = agent.miner.mine(query, domain=domain, file_types=file_types)
         return {
             "absorbed": len(absorbed),
             "new_atouts": [

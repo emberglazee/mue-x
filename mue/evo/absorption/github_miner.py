@@ -192,17 +192,19 @@ class GitHubMiner:
             json.dumps(manifest, indent=2), encoding="utf-8"
         )
 
-    def mine(self, query: Optional[str] = None, domain: str = "trading") -> list[AbsorbedPattern]:
+    def mine(self, query: Optional[str] = None, domain: str = "general",
+             file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
         """Search GitHub and absorb patterns. Domain drives scoring + filtering.
 
-        M8 FIX: When using REFERENCE_REPOS (known repos), extract directly
-        via _extract_from_repo instead of searching for the repo name as text.
+        Parameters:
+            query: Text query to search GitHub repos (optional if repo given).
+            domain: Domain for keyword scoring/filtering ('general', 'coding', 'trading', etc.).
+            file_types: File extensions to mine, e.g. ['.py', '.rs']. Default ['.py'].
         """
         newly_absorbed = []
         if query:
-            # User query: search GitHub for repos matching the text
             try:
-                patterns = self._search_and_extract(query, domain=domain)
+                patterns = self._search_and_extract(query, domain=domain, file_types=file_types)
                 for pattern in patterns:
                     if pattern.fingerprint not in self.absorbed:
                         self._absorb(pattern)
@@ -216,10 +218,10 @@ class GitHubMiner:
             for repo_full_name in repos[:3]:
                 try:
                     repo_dict = {
-                        "nameWithOwner": repo_full_name,
+                        "fullName": repo_full_name,
                         "url": f"https://github.com/{repo_full_name}",
                     }
-                    extracted = self._extract_from_repo(repo_dict, domain=domain)
+                    extracted = self._extract_from_repo(repo_dict, domain=domain, file_types=file_types)
                     for pattern in extracted:
                         if pattern.fingerprint not in self.absorbed:
                             self._absorb(pattern)
@@ -231,6 +233,27 @@ class GitHubMiner:
         self._save_manifest()
         return newly_absorbed
 
+    def mine_repo(self, repo_full_name: str, domain: str = "general",
+                  file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
+        """Mine a specific GitHub repo by full name (e.g. 'emberglazee/Hearts-of-Modding').
+
+        Skips the search step and goes straight to clone + extract.
+        """
+        repo_dict = {
+            "fullName": repo_full_name,
+            "url": f"https://github.com/{repo_full_name}",
+        }
+        absorbed = self._extract_from_repo(repo_dict, domain=domain, file_types=file_types)
+        newly = []
+        for pattern in absorbed:
+            if pattern.fingerprint not in self.absorbed:
+                self._absorb(pattern)
+                self.absorbed[pattern.fingerprint] = pattern
+                newly.append(pattern)
+        if newly:
+            self._save_manifest()
+        return newly
+
     def _rate_limit_wait(self):
         """M9: Wait if GitHub API rate limit is exhausted."""
         now = time.time()
@@ -241,52 +264,58 @@ class GitHubMiner:
             self._rate_limit_remaining = 60
             self._rate_limit_reset = now + 3600
 
-    def _search_and_extract(self, query: str, domain: str = "general") -> list[AbsorbedPattern]:
+    def _search_and_extract(self, query: str, domain: str = "general",
+                            file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
         """Search GitHub and extract patterns from top results."""
         patterns = []
 
         try:
             result = subprocess.run(
-                ["gh", "search", "repos", query, "--sort=stars", "--limit=5", "--json=nameWithOwner,url,description"],
+                ["gh", "search", "repos", query, "--sort=stars", "--limit=5", "--json=fullName,url,description"],
                 capture_output=True, text=True, timeout=30,
             )
             if result.returncode == 0:
                 repos = json.loads(result.stdout)
                 for repo in repos[:3]:
-                    extracted = self._extract_from_repo(repo, domain=domain)
+                    extracted = self._extract_from_repo(repo, domain=domain, file_types=file_types)
                     patterns.extend(extracted)
         except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError):
             pass
 
         if not patterns:
-            patterns.extend(self._web_fallback(query, domain=domain))
+            patterns.extend(self._web_fallback(query, domain=domain, file_types=file_types))
 
         return patterns
 
-    def _extract_from_repo(self, repo: dict, domain: str = "general") -> list[AbsorbedPattern]:
+    def _extract_from_repo(self, repo: dict, domain: str = "general",
+                           file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
         """Extract code patterns by cloning the repo and reading all source files.
 
         Falls back to API-based extraction only when git clone is impossible.
         Domain-aware: skips files irrelevant to the current domain.
         """
-        name = repo.get("nameWithOwner", "")
+        name = repo.get("fullName", "") or repo.get("full_name", "") or repo.get("nameWithOwner", "")
         if not name:
             return []
 
-        patterns = self._clone_and_extract(name, domain=domain)
+        patterns = self._clone_and_extract(name, domain=domain, file_types=file_types)
         if patterns:
             return patterns
 
-        return self._extract_via_api(name, domain=domain)
+        return self._extract_via_api(name, domain=domain, file_types=file_types)
 
 
-    def _clone_and_extract(self, full_name: str, domain: str = "general") -> list[AbsorbedPattern]:
-        """Shallow-clone a repo, walk relevant Python files, extract best patterns.
+    def _clone_and_extract(self, full_name: str, domain: str = "general",
+                           file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
+        """Shallow-clone a repo, walk relevant source files, extract best patterns.
 
         Domain-aware: files matching domain keywords get priority scoring.
         Irrelevant files (serialization, web boilerplate, etc.) are skipped.
+        Supports multiple file extensions via file_types (e.g. ['.py', '.rs']).
         """
         patterns = []
+        if file_types is None:
+            file_types = [".py"]
         repo_name = full_name.replace("/", "_")
         clone_path = self._clones_dir / repo_name
 
@@ -309,37 +338,41 @@ class GitHubMiner:
         except (subprocess.TimeoutExpired, Exception):
             return patterns
 
-        # Walk Python files, skipping noise directories
-        py_files = []
+        # Walk source files matching any of the requested extensions
+        src_files = []
         skip_dirs = {"test", "tests", "example", "examples", "vendor", "venv",
-                     ".venv", "node_modules", "__pycache__", "docs", "benchmarks"}
-        for py_file in clone_path.rglob("*.py"):
-            parts = set(py_file.parent.parts)
-            if parts & skip_dirs:
-                continue
-            if py_file.stat().st_size < 100 or py_file.stat().st_size > 200_000:
-                continue
-            if py_file.name in ("setup.py", "conf.py", "conftest.py"):
-                continue
-            # Domain-based file name filtering
-            if self._is_noise_file(py_file.name, domain):
-                continue
-            py_files.append(py_file)
+                     ".venv", "node_modules", "__pycache__", "docs", "benchmarks",
+                     "target", "build", "dist", ".git"}
+        for ext in file_types:
+            for src_file in clone_path.rglob(f"*{ext}"):
+                parts = set(src_file.parent.parts)
+                if parts & skip_dirs:
+                    continue
+                if src_file.stat().st_size < 100 or src_file.stat().st_size > 200_000:
+                    continue
+                # Skip known boilerplate files
+                basename = src_file.name.lower()
+                if basename in ("setup.py", "conf.py", "conftest.py", "mod.rs", "main.rs"):
+                    # Don't skip main.rs/mod.rs entirely, just deprioritize
+                    pass
+                if self._is_noise_file(src_file.name, domain):
+                    continue
+                src_files.append(src_file)
 
-        # Prioritize domain-relevant files first, then by size
-        py_files.sort(key=lambda f: (
+        # Prioritize domain-relevant files first, then by size proximity to 8K
+        src_files.sort(key=lambda f: (
             0 if self._filename_matches_domain(f.name, domain) else 1,
             abs(f.stat().st_size - 8000)
         ))
-        selected = py_files[:50]
+        selected = src_files[:50]
 
-        for py_file in selected:
+        for src_file in selected:
             try:
-                code = py_file.read_text(encoding="utf-8", errors="replace")
-                assessment = self._assess_code(code, py_file.name, domain=domain)
+                code = src_file.read_text(encoding="utf-8", errors="replace")
+                assessment = self._assess_code(code, src_file.name, domain=domain)
                 if assessment["value"] >= 0.4:
                     fingerprint = hashlib.sha256(
-                        (full_name + str(py_file.relative_to(clone_path))).encode()
+                        (full_name + str(src_file.relative_to(clone_path))).encode()
                     ).hexdigest()[:16]
                     if assessment["extracted"] and len(assessment["extracted"]) > 50:
                         patterns.append(AbsorbedPattern(
@@ -362,23 +395,32 @@ class GitHubMiner:
         return patterns
 
 
-    def _extract_via_api(self, full_name: str, domain: str = "general") -> list[AbsorbedPattern]:
+    def _extract_via_api(self, full_name: str, domain: str = "general",
+                          file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
         """Legacy API-based extraction — kept as fallback when git is unavailable."""
+        if file_types is None:
+            file_types = [".py"]
         patterns = []
 
         try:
             result = subprocess.run(
                 ["gh", "api", f"repos/{full_name}/git/trees/HEAD?recursive=1",
-                 "--jq", ".tree[] | select(.type==\"blob\") | select(.path | endswith(\".py\")) | .path"],
+                 "--jq", ".tree[] | select(.type==\"blob\") | .path"],
                 capture_output=True, text=True, timeout=30,
             )
             if result.returncode != 0:
                 return patterns
 
-            py_paths = [p for p in result.stdout.strip().split("\n") if p
-                       and "test" not in p.lower() and "example" not in p.lower()
-                       and not p.endswith("setup.py")
-                       and not self._is_noise_file(p.split("/")[-1], domain)][:20]
+            all_paths = [p for p in result.stdout.strip().split("\n") if p]
+            # Filter by extension and noise patterns
+            py_paths = [
+                p for p in all_paths
+                if any(p.endswith(ext) for ext in file_types)
+                and "test" not in p.lower()
+                and "example" not in p.lower()
+                and not p.endswith("setup.py")
+                and not self._is_noise_file(p.split("/")[-1], domain)
+            ][:20]
 
             for path in py_paths:
                 try:
@@ -413,12 +455,16 @@ class GitHubMiner:
 
         return patterns
 
-    def _web_fallback(self, query: str, domain: str = "general") -> list[AbsorbedPattern]:
+    def _web_fallback(self, query: str, domain: str = "general",
+                       file_types: Optional[list[str]] = None) -> list[AbsorbedPattern]:
         """When gh CLI not available, mine GitHub via API without auth.
 
         Uses Repository Search (no auth required) to find repos,
-        then Git Trees API (recursive) to find Python files.
+        then Git Trees API (recursive) to find source files.
+        Supports multiple file extensions via file_types.
         """
+        if file_types is None:
+            file_types = [".py"]
         import urllib.request
         import urllib.parse
 
@@ -445,7 +491,7 @@ class GitHubMiner:
                 if not full_name:
                     continue
 
-                # Step 2: Get recursive git tree to find ALL .py files
+                # Step 2: Get recursive git tree to find ALL source files
                 try:
                     tree_url = (
                         f"https://api.github.com/repos/{full_name}"
@@ -460,21 +506,22 @@ class GitHubMiner:
                         tree_data = json.loads(resp2.read().decode("utf-8"))
                     self._rate_limit_remaining -= 1
 
-                    py_entries = [
+                    # Filter entries by any of the requested extensions
+                    src_entries = [
                         e for e in tree_data.get("tree", [])
-                        if e.get("path", "").endswith(".py")
+                        if any(e.get("path", "").endswith(ext) for ext in file_types)
                         and e.get("type") == "blob"
                         and e.get("size", 0) < 50000
                         and "test" not in e.get("path", "").lower()
                         and "example" not in e.get("path", "").lower()
                     ]
 
-                    # Pick up to 5 Python files, prefer non-init files
-                    py_entries.sort(key=lambda e: (
-                        0 if e["path"].endswith("__init__.py") else 1,
+                    # Pick up to 5 source files, prefer non-init/non-mod files
+                    src_entries.sort(key=lambda e: (
+                        1 if any(e["path"].endswith(n) for n in ("__init__.py", "mod.rs", "lib.rs")) else 0,
                         -(e.get("size", 0))
                     ))
-                    selected = py_entries[:5]
+                    selected = src_entries[:5]
 
                     for entry in selected:
                         path = entry["path"]

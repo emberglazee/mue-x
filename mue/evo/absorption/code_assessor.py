@@ -87,29 +87,98 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
 
     Files matching the current domain get up to +0.35 bonus.
     Files matching penalty keywords get -0.50 penalty (effectively rejected).
+
+    Supports multiple languages — Python, Rust, Go, JavaScript/TypeScript, etc.
+    Language-specific keywords are recognized for base scoring.
     """
     lines = code.split("\n")
     code_lower = code.lower()
     filename_lower = filename.lower()
 
+    # Detect language from file extension
+    is_py = filename.endswith(".py")
+    is_rs = filename.endswith(".rs")
+    is_go = filename.endswith(".go")
+    is_js_ts = any(filename.endswith(e) for e in (".js", ".jsx", ".ts", ".tsx"))
+
     value = 0.15
-    if "class " in code:
-        value += 0.10
-    if "def " in code:
-        value += 0.08
-    if "async " in code:
-        value += 0.05
+    # Language-agnostic quality indicators
     if len(lines) > 50:
         value += 0.05
     if len(lines) < 300:
         value += 0.05
-    if "yield" in code_lower or "generator" in code_lower:
+    if "async " in code_lower or "await " in code_lower:
         value += 0.05
     if "cache" in code_lower or "lru" in code_lower:
         value += 0.07
-    if "retry" in code_lower:
+    if "retry" in code_lower or "fallback" in code_lower:
         value += 0.05
+    if "error" in code_lower or "result" in code_lower:
+        value += 0.03
 
+    # Python-specific
+    if is_py:
+        if "class " in code:
+            value += 0.10
+        if "def " in code:
+            value += 0.08
+        if "yield" in code_lower or "generator" in code_lower:
+            value += 0.05
+        if any(kw in code for kw in ("@property", "@staticmethod", "@classmethod")):
+            value += 0.04
+
+    # Rust-specific
+    if is_rs:
+        if "fn " in code:
+            value += 0.08
+        if "struct " in code or "enum " in code:
+            value += 0.06
+        if "impl " in code:
+            value += 0.06
+        if "trait " in code:
+            value += 0.06
+        if "unsafe " in code:
+            value += 0.04
+        if "pub " in code:
+            value += 0.04
+        if "match " in code:
+            value += 0.03
+        if "#[derive" in code or "#[allow" in code:
+            value += 0.03
+        if "use " in code:
+            value += 0.02
+
+    # Go-specific
+    if is_go:
+        if "func " in code:
+            value += 0.08
+        if "type " in code or "struct " in code:
+            value += 0.06
+        if "interface " in code:
+            value += 0.06
+        if "package " in code:
+            value += 0.02
+        if "defer " in code:
+            value += 0.04
+        if "go func" in code or "goroutine" in code_lower:
+            value += 0.04
+
+    # JS/TS-specific
+    if is_js_ts:
+        if "function " in code or "=>" in code:
+            value += 0.08
+        if "class " in code:
+            value += 0.08
+        if "interface " in code or "type " in code:
+            value += 0.06
+        if "import " in code or "export " in code:
+            value += 0.04
+        if "async " in code_lower or "await " in code_lower:
+            value += 0.04
+        if "const " in code or "let " in code:
+            value += 0.03
+
+    # Domain-specific keyword scoring & penalties
     high_hits = 0
     if domain in DOMAIN_KEYWORDS:
         kw = DOMAIN_KEYWORDS[domain]
