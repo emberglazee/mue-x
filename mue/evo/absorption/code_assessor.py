@@ -25,8 +25,12 @@ DOMAIN_KEYWORDS = {
     },
     "coding": {
         "high": ["algorithm", "optimize", "compiler", "parser", "ast", "transform",
-                 "refactor", "lint", "static_analysis", "type_check"],
-        "med": ["cache", "async", "generator", "decorator", "context_manager"],
+                 "refactor", "lint", "static_analysis", "type_check",
+                 "handler", "manager", "factory", "module", "component", "dispatch",
+                 "delegate", "event", "worker", "pool", "callback"],
+        "med": ["cache", "async", "generator", "decorator", "context_manager",
+                "error", "status", "init", "create", "update", "process",
+                "render", "config", "session", "connection"],
         "penalty": ["marshmallow", "serializer", "template", "html", "css",
                     "migration", "orm", "admin"],
     },
@@ -105,14 +109,17 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
 
     value = 0.15
     # Language-agnostic quality indicators
-    if len(lines) > 50:
-        value += 0.05
-    if len(lines) < 300:
-        value += 0.05
+    # Size maturity (graduated — no binary cutoff penalty for large files)
+    if len(lines) >= 30:
+        value += 0.05  # non-trivial file
+    if len(lines) >= 100:
+        value += 0.03  # substantial file
+    if len(lines) >= 500:
+        value += 0.02  # large file
     if "async " in code_lower or "await " in code_lower:
         value += 0.05
     if "cache" in code_lower or "lru" in code_lower:
-        value += 0.07
+        value += 0.04  # was 0.07 — reduced to avoid cache-file bias
     if "retry" in code_lower or "fallback" in code_lower:
         value += 0.05
     if "error" in code_lower or "result" in code_lower:
