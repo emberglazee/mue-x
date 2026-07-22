@@ -100,13 +100,17 @@ def cmd_interactive():
             continue
         if msg == "/genes":
             agent = get_agent()
-            for g in agent.state.get("genes", []):
-                print(f"  {g.get('name', '?')} — fitness: {g.get('fitness', 0):.2f}")
+            for name, gene in list(agent.genome.genes.items())[:30]:
+                print(f"  {name} — fitness: {gene.fitness:.2f}")
+            total = len(agent.genome.genes)
+            if total > 30:
+                print(f"  ... and {total - 30} more")
             continue
         if msg == "/atouts":
             agent = get_agent()
-            for a in agent.state.get("atouts", []):
-                print(f"  {a.get('name', '?')} — {a.get('source', '?')}")
+            for a in agent.miner.list_atouts():
+                print(f"  {a.get('description', '?')[:70]} — {a.get('source', '?')} [v={a.get('value', 0):.2f}]")
+            print(f"  Total: {agent.miner.stats['total_atouts']} atouts, avg value: {agent.miner.stats['avg_value']:.2f}")
             continue
 
         result = agent.chat(msg)
