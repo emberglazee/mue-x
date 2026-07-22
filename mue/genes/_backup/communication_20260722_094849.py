@@ -25,15 +25,9 @@ def generate_summary(events: list[dict], max_items: int=5) -> str:
             when = str(ts)
         desc = event.get('description', str(event))[:120]
         try:
-            try:
-                lines.append(f'[{when}] {desc}')
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            lines.append(f'[{when}] {desc}')
         except Exception as e:
-            try:
-                print(f'[EVO] Error: {e}')
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            print(f'[EVO] Error: {e}')
     return '\n'.join(lines)
 
 def sanitize_output(text: str, max_length: int=2000) -> str:
@@ -41,14 +35,13 @@ def sanitize_output(text: str, max_length: int=2000) -> str:
     if len(text) > max_length:
         text = text[:max_length - 3] + '...'
     return text.strip()
+
 import functools
 import time
 
-def _retry_on_failure(max_retries: int=3, delay: float=1.0, backoff: float=2.0):
+def _retry_on_failure(max_retries: int = 3, delay: float = 1.0, backoff: float = 2.0):
     """Decorator: retry a function on exception with exponential backoff."""
-
     def decorator(func):
-
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             _delay = delay
@@ -58,10 +51,7 @@ def _retry_on_failure(max_retries: int=3, delay: float=1.0, backoff: float=2.0):
                 except Exception as e:
                     if attempt == max_retries - 1:
                         raise
-                    try:
-                        time.sleep(_delay)
-                    except Exception as e:
-                        print(f'[EVO] Error: {e}')
+                    time.sleep(_delay)
                     _delay *= backoff
             return None
         return wrapper
