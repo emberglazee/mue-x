@@ -236,5 +236,5 @@ class TaskRunner:
             "total_runs": self.total_runs,
             "success_rate": self.successful_runs / max(self.total_runs, 1),
             "recent_scores": [r.score for r in self.results[-20:]],
-            "domains": list(self._executors.keys()),
+            "domains": [d.value for d in self._executors.keys()],
         }
