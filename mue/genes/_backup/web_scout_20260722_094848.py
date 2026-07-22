@@ -21,15 +21,9 @@ def search_web(query: str, max_results: int=3) -> list[dict]:
                     snippet = line.split('>')[-1].split('<')[0].strip()
                     if snippet:
                         try:
-                            try:
-                                results.append({'title': '', 'snippet': snippet, 'url': ''})
-                            except Exception as e:
-                                print(f'[EVO] Error: {e}')
+                            results.append({'title': '', 'snippet': snippet, 'url': ''})
                         except Exception as e:
-                            try:
-                                print(f'[EVO] Error: {e}')
-                            except Exception as e:
-                                print(f'[EVO] Error: {e}')
+                            print(f'[EVO] Error: {e}')
     except Exception:
         pass
     return results

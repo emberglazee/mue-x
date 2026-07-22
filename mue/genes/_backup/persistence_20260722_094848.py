@@ -14,15 +14,9 @@ class StateCache:
     def __init__(self, cache_dir: str='.mue_cache'):
         self.cache_dir = Path(cache_dir)
         try:
-            try:
-                self.cache_dir.mkdir(parents=True, exist_ok=True)
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
-            try:
-                print(f'[EVO] Error: {e}')
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            print(f'[EVO] Error: {e}')
         self._memory: dict[str, dict] = {}
 
     def set(self, key: str, value, ttl_seconds: Optional[float]=None):
@@ -31,15 +25,9 @@ class StateCache:
         self._memory[key] = entry
         cache_file = self.cache_dir / f"{key.replace('/', '_')}.json"
         try:
-            try:
-                cache_file.write_text(json.dumps(entry, indent=2), encoding='utf-8')
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            cache_file.write_text(json.dumps(entry, indent=2), encoding='utf-8')
         except Exception as e:
-            try:
-                print(f'[EVO] Error: {e}')
-            except Exception as e:
-                print(f'[EVO] Error: {e}')
+            print(f'[EVO] Error: {e}')
 
     def get(self, key: str):
         """Retrieve a value, handling TTL."""
