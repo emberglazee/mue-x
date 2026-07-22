@@ -71,31 +71,3 @@ def _retry_on_failure(max_retries: int = 3, delay: float = 1.0, backoff: float =
             return None
         return wrapper
     return decorator
-
-
-import time
-
-class _CircuitBreaker:
-    """Prevents cascading failures by stopping calls after threshold."""
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self._failures = 0
-        self._last_failure_time = 0.0
-        self._state = 'closed'
-    @property
-    def is_open(self) -> bool:
-        if self._state == 'closed':
-            return False
-        if time.time() - self._last_failure_time > self.recovery_timeout:
-            self._state = 'half_open'
-            return False
-        return True
-    def record_failure(self):
-        self._failures += 1
-        self._last_failure_time = time.time()
-        if self._state == 'half_open' or self._failures >= self.failure_threshold:
-            self._state = 'open'
-    def record_success(self):
-        self._failures = 0
-        self._state = 'closed'
