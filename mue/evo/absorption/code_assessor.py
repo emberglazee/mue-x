@@ -106,6 +106,7 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
     is_js_ts = any(filename.endswith(e) for e in (".js", ".jsx", ".ts", ".tsx"))
     is_c_cpp = any(filename.endswith(e) for e in (".cpp", ".hpp", ".h", ".c", ".cc", ".cxx", ".hh", ".hxx", ".tcc", ".ipp"))
     is_java = any(filename.endswith(e) for e in (".java", ".kt"))
+    is_cs = filename.endswith(".cs")
 
     value = 0.15
     # Language-agnostic quality indicators
@@ -226,6 +227,29 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
             value += 0.02
         if "this." in code or "super." in code:
             value += 0.03
+
+    # C#-specific
+    if is_cs:
+        if "class " in code:
+            value += 0.10
+        if "interface " in code:
+            value += 0.07
+        if "enum " in code or "struct " in code:
+            value += 0.06
+        if "namespace " in code:
+            value += 0.05
+        if "using " in code or "#region" in code:
+            value += 0.04
+        if "async " in code or "await " in code:
+            value += 0.05
+        if "get;" in code or "set;" in code:
+            value += 0.04
+        if "=>" in code:
+            value += 0.03
+        if "Task" in code or "async " in code:
+            value += 0.04
+        if "LINQ" in code or ".Select" in code or ".Where(" in code:
+            value += 0.04
 
     # Domain-specific keyword scoring & penalties
     high_hits = 0
