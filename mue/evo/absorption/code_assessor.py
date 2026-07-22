@@ -100,6 +100,7 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
     is_rs = filename.endswith(".rs")
     is_go = filename.endswith(".go")
     is_js_ts = any(filename.endswith(e) for e in (".js", ".jsx", ".ts", ".tsx"))
+    is_c_cpp = any(filename.endswith(e) for e in (".cpp", ".hpp", ".h", ".c", ".cc", ".cxx", ".hh", ".hxx", ".tcc", ".ipp"))
 
     value = 0.15
     # Language-agnostic quality indicators
@@ -176,6 +177,25 @@ def assess_code(code: str, filename: str, domain: str = "general") -> dict:
         if "async " in code_lower or "await " in code_lower:
             value += 0.04
         if "const " in code or "let " in code:
+            value += 0.03
+
+    # C/C++-specific
+    if is_c_cpp:
+        if "class " in code:
+            value += 0.10
+        if "template " in code:
+            value += 0.08
+        if "virtual " in code:
+            value += 0.06
+        if "constexpr " in code or "noexcept" in code or "static_assert" in code:
+            value += 0.06
+        if "override" in code or "final" in code:
+            value += 0.04
+        if "namespace " in code:
+            value += 0.04
+        if "#include" in code or "#pragma" in code:
+            value += 0.03
+        if "std::" in code:
             value += 0.03
 
     # Domain-specific keyword scoring & penalties
